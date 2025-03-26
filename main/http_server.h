@@ -6,13 +6,17 @@
  * @brief HTTP server
  */
 
+ #define OTA_UPDATE_PENDING    0
+ #define OTA_UPDATE_SUCCESSFUL 1
+#define OTA_UPDATE_FAILED      -1
+
+
  typedef enum http_server_message
  {
     HTTP_MSG_WIFI_CONNECT_INIT = 0,
     HTTP_MSG_WIFI_CONNECT_SUCCESS,
     HTTP_MSG_WIFI_CONNECT_FAILED,
     HTTP_MSG_WIFI_DISCONNECTED,
-    HTTP_MSG_OTA_UPDATE_INITIALIZED,
     HTTP_MSG_OTA_UPDATE_SUCCESSFUL,
     HTTP_MSG_OTA_UPDATE_FAILED,
  } http_server_message_e;
@@ -42,5 +46,11 @@
   * Stops the http server task
   */
 void http_server_stop(void);
+
+/**
+ * @brief Timer callback ffunction which calls esp_restart upon successful OTA update
+ */
+
+ void http_server_fw_update_reset_callback(void *arg);
 
 #endif /* MAIN_HTTP_SERVER_H_ */
