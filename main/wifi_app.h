@@ -9,7 +9,7 @@
 #include "portmacro.h"
 
 // Wifi Application Settings
-#define WIFI_AP_SSID "ESP32_AP"
+#define WIFI_AP_SSID "Weather Station"
 #define WIFI_AP_PASSWORD "password"
 #define WIFI_AP_CHANNEL 1
 #define WIFI_AP_SSID_VISIBILITY 0
