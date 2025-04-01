@@ -37,6 +37,30 @@ h4 {
 	color: #1d3557;
 }	
 
+#DHT22Sensor .reading {
+    margin-bottom: 8px; 
+}
+
+#DHT22Sensor label {
+    display: inline-block;
+    width: 200px; 
+}
+
+#DHT22Sensor div {
+    display: inline-block;
+}
+
+
+#temperature_reading {
+    display: inline;
+    color: #1d3557; 
+}
+
+#humidity_reading {
+    display: inline;
+    color: #1d3557; 
+}
+
 .buttons {
     padding: 5px;
 }
