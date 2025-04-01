@@ -49,7 +49,8 @@ void setDHTgpio( int gpio )
 // == get temp & hum =============================================
 
 float getHumidity() { return humidity; }
-float getTemperature() { return temperature; }
+float getTemperatureCelsius() { return temperature; }
+float getTemperatureFahrenheit() { return (getTemperatureCelsius() * 1.8 + 32); }
 
 // == error handler ===============================================
 
@@ -92,7 +93,6 @@ int getSignalLevel( int usTimeOut, bool state )
 			return -1;
 		
 		++uSec;
-		//ets_delay_us(1);		// uSec delay
 		esp_rom_delay_us(1);		// uSec delay
 	}
 	
@@ -244,14 +244,14 @@ static void DHT22_task(void *pvParameter)
 
 	for(;;)
 	{
-		printf("=== Reading DHT ===\n");
 		int ret = readDHT();
-
 		errorHandler(ret);
-
-		printf("Hum %.1f\n", getHumidity());
-		printf("Temp %.1f\n", getTemperature());
 		
+		// Uncomment if needed for direct console feedback
+		//printf("=== Reading DHT ===\n");
+		//printf("Humidity (%%):      %.1f\n", getHumidity());
+		//printf("Temperature (*F):  %.1f\n", getTemperatureFahrenheit());
+	
 		vTaskDelay(4000 / portTICK_PERIOD_MS);
 	}
 }

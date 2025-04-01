@@ -25,7 +25,8 @@ void 	setDHTgpio(int gpio);
 void 	errorHandler(int response);
 int 	readDHT();
 float 	getHumidity();
-float 	getTemperature();
+float 	getTemperatureCelsius();
+float	getTemperatureFahrenheit();
 int 	getSignalLevel( int usTimeOut, bool state );
 
 #endif
