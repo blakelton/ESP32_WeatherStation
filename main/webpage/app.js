@@ -3,6 +3,7 @@
  */
 var seconds 	= null;
 var otaTimerVar =  null;
+var wifiConnectInterval = null;
 
 /**
  * Initialize functions here.
@@ -10,7 +11,13 @@ var otaTimerVar =  null;
 $(document).ready(function(){
 	getUpdateStatus();
     startDHTSensorValues();
-});   
+    $("#connect_wifi").on("click", function(){
+        checkCredentials();
+
+    });
+});
+
+
 
 /**
  * Gets file name and size for display on the web page.
@@ -134,4 +141,112 @@ function getDHTSensorValues()
 function startDHTSensorValues()
 {
     setInterval(getDHTSensorValues, 5000);
+}
+
+/**
+ * Clears the connection status interval
+ */
+function stopWiFiConnectStatusInterval()
+{
+    if(wifiConnectInterval != null)
+    {
+        clearInterval(wifiConnectInterval);
+        wifiConnectInterval = null;
+    }
+}
+
+/**
+ * Get the WiFi connection status
+ */
+function getWiFiConnectionStatus()
+{
+    var xhr = new XMLHttpRequest();
+    var requestURL = "/wifiConnectStatus";
+    xhr.open('POST', requestURL, false);
+    xhr.send('wifi_connect_status');
+
+    if(xhr.readyState == 4 && xhr.status == 200)
+    {
+        var response = JSON.parse(xhr.responseText);
+        document.getElementById('wifi_connect_status').innerHTML = "Connecting...";
+
+        if(response.wifi_connect_status == 2)
+        {
+            document.getElementById("wifi_connect_status").innerHTML = "<h4 class='rd'>Failed to Connect. Please check your AP credentials and compatibility</h4>";
+            stopWiFiConnectionStatusInterval();
+        }
+        else if (response.wifi_connect_status == 3)
+        {
+            document.getElementById("wifi_connect_status").innerHTML = "<h4 class='gr'>Connection Success!</h4>";
+            stopWiFiConnectionStatusInterval();
+        }
+    }
+}
+
+/**
+ * Starts the interval for checking the connection status
+ */
+function startWiFiConnectStatusInterval()
+{
+    wifiConnectInterval = setInterval(getWiFiConnectionStatus, 2800);
+}
+
+/**
+ * Connect WiFi function called using the SSID and password into the text fields
+ */
+function connectWiFi()
+{
+    //Get SSID and Password
+    selectedSSID = $("#connect_ssid").val();
+    pwd = $("#connect_pass").val();
+
+    $.ajax({
+        url: 'wifiConnect.json',
+        dataType: 'json',
+        method: 'POST',
+        cache: false,
+        headers: {'my-connect-ssid': selectedSSID, 'my-connect-pwd': pwd},
+        data: {'timestamp': Date.now()}
+    });
+
+    startWiFiConnectStatusInterval();
+}
+
+/**
+ * Checks credentials on connect_wifi button click.
+ */
+function checkCredentials()
+{
+    errorList = "";
+    credsOK = true;
+
+    selectedSSID = $("#connect_ssid").val();
+    pwd = $("#connect_pass").val();
+
+    if(selectedSSID == "")
+    {
+        errorList += "<h4 class='rd'>SSID cannot be empty!</h4>";
+        credsOk = false;
+    }
+    if(credsOK == false)
+    {
+        $("#wifi_connect_credentials_errors").html("");
+        connectWiFi();
+    }
+}
+
+/**
+ * Shows the wifi password if box checked
+ */
+function showPassword()
+{
+    var x = document.getElementById("connect_pass");
+    if(x.type === "password")
+    {
+        x.type = "text";
+    }
+    else
+    {
+        x.type = "password";
+    }
 }
