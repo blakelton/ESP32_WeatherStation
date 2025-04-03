@@ -173,12 +173,12 @@ function getWiFiConnectionStatus()
         if(response.wifi_connect_status == 2)
         {
             document.getElementById("wifi_connect_status").innerHTML = "<h4 class='rd'>Failed to Connect. Please check your AP credentials and compatibility</h4>";
-            stopWiFiConnectionStatusInterval();
+            stopWiFiConnectStatusInterval();
         }
         else if (response.wifi_connect_status == 3)
         {
             document.getElementById("wifi_connect_status").innerHTML = "<h4 class='gr'>Connection Success!</h4>";
-            stopWiFiConnectionStatusInterval();
+            stopWiFiConnectStatusInterval();
         }
     }
 }
@@ -226,9 +226,17 @@ function checkCredentials()
     if(selectedSSID == "")
     {
         errorList += "<h4 class='rd'>SSID cannot be empty!</h4>";
-        credsOk = false;
+        credsOK = false;
+    }
+    if(pwd == "")
+    {
+        errorList += <"h4 class='rd'>Password cannot be empty</h4>";
     }
     if(credsOK == false)
+    {
+        $("#wifi_connect_credentials_errors").html(errorList);
+    }
+    else
     {
         $("#wifi_connect_credentials_errors").html("");
         connectWiFi();
