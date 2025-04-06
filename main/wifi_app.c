@@ -63,11 +63,9 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
                 ESP_LOGI(TAG, "WIFI_EVENT_STA_CONNECTED");
                 break;
             case WIFI_EVENT_STA_DISCONNECTED: 
-                ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED");
-
+                ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED, reason code %d", ((wifi_event_sta_disconnected_t*)event_data)->reason);
                 wifi_event_sta_disconnected_t *wifi_event_sta_disconnected = (wifi_event_sta_disconnected_t*)malloc(sizeof(wifi_event_sta_disconnected_t));
                 *wifi_event_sta_disconnected = *((wifi_event_sta_disconnected_t*)event_data);
-                printf("WIFI_EVENT_STA_DISCONNECTED, reason code %d\n", wifi_event_sta_disconnected->reason);
 
                 if(g_retry_number < MAX_CONNECTION_RETRIES)
                 {
@@ -110,7 +108,7 @@ static void wifi_app_event_handler_init(void)
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
                     WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_app_event_handler, NULL, &instance_wifi_event));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
-                        WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_app_event_handler, NULL, &instance_ip_event));
+                        IP_EVENT, ESP_EVENT_ANY_ID, &wifi_app_event_handler, NULL, &instance_ip_event));
 }
 
 /**

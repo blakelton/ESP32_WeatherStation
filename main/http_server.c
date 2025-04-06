@@ -10,6 +10,7 @@
 #include "sys/param.h"
 
 #include "dht22.h"
+#include "cJSON.h"
 #include "http_server.h"
 #include "tasks_common.h"
 #include "wifi_app.h"
@@ -322,47 +323,68 @@ esp_err_t http_server_ota_status_handler(httpd_req_t *req)
   * @param req HTTP request for which the uri needs to be handled.
   * @return ESP_OK
   */
- static esp_err_t http_server_wifi_connect_json_handler(httpd_req *req)
+ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
  {
-    ESP_LOGI(TAG, "/wifiConnect.json requested");
-
-    size_t len_ssid = 0, len_pass = 0;
-    char *ssid_str = NULL, *pass_str = NULL;
-
-    // Get SSID header
-    len_ssid = httpd_req_get_hdr_value_len(req, "my-connect-ssid") +1;
-    if(len_ssid > 1)
-    {
-        ssid_str = malloc(len_ssid);
-        if(httpd_req_get_hdr_value_str(req, "my-connect-ssid", ssid_str, len_ssid) == ESP_OK)
-        {
-            ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: found header => my-connect-ssid: %s", ssid_str);
-        }
-    }
-
-    // Get Password header
-    len_pwd = httpd_req_get_hdr_value_len(req, "my-connect-pwd") +1;
-    if(len_pwd > 1)
-    {
-        pwd_str = malloc(len_pwd);
-        if(httpd_req_get_hdr_value_str(req, "my-connect-pwd", pwd_str, len_pwd) == ESP_OK)
-        {
-            ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: found header => my-connect-pwd: %s", pwd_str);
-        }
-    }
-
-    // Update the WiFi networks configuration and let the WiFi application know
-    wifi_config_t* wifi_config = wifi_app_get_wifi_config();
-    memset(wifi_config, 0x00, sizeof(wifi_config_t));
-    memcpy(wifi_config->sta.ssid, ssid_str, len_ssid);
-    memcpy(wifi_config->sta.password, pwd_str, len_pwd);
-    wifi_app_send_message(WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER);
-
-    free(ssid_str);
-    free(pwd_str);
-
-    return ESP_OK;
+     ESP_LOGI(TAG, "/wifiConnect.json requested");
+ 
+     // Determine the length of the request body.
+     int total_len = req->content_len;
+     if(total_len <= 0) {
+         ESP_LOGE(TAG, "Empty request body");
+         return ESP_FAIL;
+     }
+     
+     // Allocate a buffer for the body.
+     char *buf = malloc(total_len + 1);
+     if(buf == NULL) {
+         ESP_LOGE(TAG, "Failed to allocate memory for request body");
+         return ESP_ERR_NO_MEM;
+     }
+     
+     // Read the body.
+     int ret = httpd_req_recv(req, buf, total_len);
+     if(ret <= 0) {
+         ESP_LOGE(TAG, "Failed to read request body");
+         free(buf);
+         return ESP_FAIL;
+     }
+     buf[total_len] = '\0';  // Null-terminate the string.
+     ESP_LOGI(TAG, "Received body: %s", buf);
+     
+     // Parse the JSON data.
+     cJSON *json = cJSON_Parse(buf);
+     free(buf);
+     if(json == NULL) {
+         ESP_LOGE(TAG, "Failed to parse JSON");
+         return ESP_FAIL;
+     }
+     
+     // Extract the SSID and password values.
+     cJSON *ssid_json = cJSON_GetObjectItemCaseSensitive(json, "ssid");
+     cJSON *password_json = cJSON_GetObjectItemCaseSensitive(json, "password");
+     if(!cJSON_IsString(ssid_json) || !cJSON_IsString(password_json)) {
+         ESP_LOGE(TAG, "Invalid JSON: missing or invalid ssid or password");
+         cJSON_Delete(json);
+         return ESP_FAIL;
+     }
+     
+     const char *ssid_str = ssid_json->valuestring;
+     const char *pwd_str = password_json->valuestring;
+     
+     // Update the WiFi configuration.
+     wifi_config_t* wifi_config = wifi_app_get_wifi_config();
+     memset(wifi_config, 0x00, sizeof(wifi_config_t));
+     // Use strncpy to ensure no buffer overflow.
+     strncpy((char*)wifi_config->sta.ssid, ssid_str, sizeof(wifi_config->sta.ssid) - 1);
+     strncpy((char*)wifi_config->sta.password, pwd_str, sizeof(wifi_config->sta.password) - 1);
+     
+     // Signal the WiFi task to attempt a connection.
+     wifi_app_send_message(WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER);
+     
+     cJSON_Delete(json);
+     return ESP_OK;
  }
+ 
 
  /**
   * wifiConnectStatus Handler updates the connection status for the web page.

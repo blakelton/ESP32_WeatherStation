@@ -6,6 +6,8 @@
 #define MAIN_WIFI_APP_H_
 
 #include "esp_netif.h"
+#include "esp_wifi_types.h"
+#include "freertos/FreeRTOS.h"
 #include "portmacro.h"
 
 // Wifi Application Settings
@@ -65,6 +67,6 @@ void wifi_app_start(void);
 /**
  * get the wifi configuration
  */
-void wifi_config_t* wifi_app_get_wifi_config(void);
+wifi_config_t* wifi_app_get_wifi_config(void);
 
 #endif /* MAIN_WIFI_APP_H_ */

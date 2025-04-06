@@ -81,7 +81,7 @@ function getUpdateStatus()
 {
     var xhr = new XMLHttpRequest();
     var requestURL = "/OTAstatus";
-    xhr.open('POST', requestURL, false);
+    xhr.open('POST', requestURL, true);
     xhr.send('ota_update_status');
 
     if (xhr.readyState == 4 && xhr.status == 200) 
@@ -168,7 +168,7 @@ function getWiFiConnectionStatus()
     if(xhr.readyState == 4 && xhr.status == 200)
     {
         var response = JSON.parse(xhr.responseText);
-        document.getElementById('wifi_connect_status').innerHTML = "Connecting...";
+        document.getElementById('wifi_connect_status').innerHTML = "<h4>Connecting...</h4>";
 
         if(response.wifi_connect_status == 2)
         {
@@ -203,10 +203,15 @@ function connectWiFi()
     $.ajax({
         url: 'wifiConnect.json',
         dataType: 'json',
+        contentType: 'application/json',
         method: 'POST',
         cache: false,
-        headers: {'my-connect-ssid': selectedSSID, 'my-connect-pwd': pwd},
-        data: {'timestamp': Date.now()}
+        //headers: {'my-connect-ssid': selectedSSID, 'my-connect-pwd': pwd},
+        data: JSON.stringify({ 
+            ssid: selectedSSID, 
+            password: pwd,
+            timestamp: Date.now()
+            })
     });
 
     startWiFiConnectStatusInterval();
@@ -230,7 +235,8 @@ function checkCredentials()
     }
     if(pwd == "")
     {
-        errorList += <"h4 class='rd'>Password cannot be empty</h4>";
+        errorList += "<h4 class='rd'>Password cannot be empty</h4>";
+        credsOK = false;
     }
     if(credsOK == false)
     {
