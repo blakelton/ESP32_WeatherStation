@@ -27,8 +27,8 @@
 #define MAX_CONNECTION_RETRIES 5         // Maximum number of connection retries
 
 // netif object for the Station and Access Point
-extern esp_netif_t *sta_netif;
-extern esp_netif_t *ap_netif;
+extern esp_netif_t *esp_netif_sta;
+extern esp_netif_t *esp_netif_ap;
 
 /**
  * Message IDs for the WiFi application task
@@ -39,6 +39,7 @@ typedef enum wifi_app_message
     WIFI_APP_MSG_START_HTTP_SERVER = 0,
     WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER,
     WIFI_APP_MSG_STA_CONNECTED_GOT_IP,
+    WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT,
     WIFI_APP_MSG_STA_DISCONNECTED,
 } wifi_app_message_e;
 

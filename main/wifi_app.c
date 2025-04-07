@@ -227,6 +227,12 @@ static void wifi_app_task(void *pvParameters)
                     rgb_led_wifi_connected();
                     http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
                     break;
+                case WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT:
+                    ESP_LOGI(TAG, "WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT");
+                    g_retry_number = MAX_CONNECTION_RETRIES;
+                    ESP_ERROR_CHECK(esp_wifi_disconnect());
+                    rgb_led_http_server_started(); //TODO - rename the status led to something more appropriate
+                    break;
                 case WIFI_APP_MSG_STA_DISCONNECTED:
                     ESP_LOGI(TAG, "WIFI_APP_MSG_STA_DISCONNECTED");
                     http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_FAILED);
