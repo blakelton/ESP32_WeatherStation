@@ -102,6 +102,10 @@ static void http_server_monitor(void *parameter)
                     ESP_LOGI(TAG, "HTTP_MSG_WIFI_CONNECT_FAILED");
                     g_wifi_connect_status = HTTP_WIFI_STATUS_CONNECT_FAILED;
                     break;
+                case HTTP_MSG_WIFI_USER_DISCONNECT:
+                    ESP_LOGI(TAG, "HTTP_MSG_WIFI_USER_DISCONNECT");
+                    g_wifi_connect_status = HTTP_WIFI_STATUS_DISCONNECTED;
+                    break;
                 case HTTP_MSG_WIFI_DISCONNECTED:
                     ESP_LOGI(TAG, "HTTP_MSG_WIFI_DISCONNECTED");
                     break;
